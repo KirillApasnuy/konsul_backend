@@ -10,7 +10,6 @@ from utils.utils import parse_query
 
 settings = Settings()
 
-openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 class SearchService:
@@ -58,42 +57,37 @@ class SearchService:
         Поиск судебных дел с подсветкой фрагментов и полной информацией из MongoDB
         """
         try:
-            # Поиск в Elasticsearch
-            es_response = await self.es_repo.search_with_highlight(
-                query={
-                    "match": {
-                        "text_of_decision": query_text
-                    }
-                },
-                source_fields=["case_number", "URL"],
-                highlight_fields={"text_of_decision": {}},
+            # Используем специализированный метод поиска из ElasticsearchRepository
+            es_response = await self.es_repo.search_legal_cases(
+                query_text=query_text,
                 size=limit
             )
 
             hits = es_response["hits"]["hits"]
             total_found = es_response["hits"]["total"]["value"]
 
-            results = []
+            case_numbers = [hit["_source"]["case_number"] for hit in hits]
 
+            # Один запрос в MongoDB по всем case_number
+            full_docs = await self.mongo_repo_ss.find_by_case_numbers(case_numbers)
+            docs_by_case_number = {doc["case_number"]: doc for doc in full_docs}
+
+            results = []
             for hit in hits:
                 case_number = hit["_source"]["case_number"]
                 url = hit["_source"].get("URL", "")
                 highlight = hit.get("highlight", {}).get("text_of_decision", ["<нет фрагмента>"])[0]
 
-                # Поиск полного документа в MongoDB
-                full_doc = await self.mongo_repo_ss.find_by_case_number(case_number)
-
+                full_doc = docs_by_case_number.get(case_number)
                 if full_doc and "_id" in full_doc:
                     full_doc["_id"] = str(full_doc["_id"])
 
-                result = {
+                results.append({
                     "case_number": case_number,
                     "url": url,
                     "highlight": highlight,
-                    "full_document": full_doc if full_doc else None
-                }
-
-                results.append(result)
+                    "full_document": full_doc or None
+                })
 
             return {
                 "total_found": total_found,
