@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  fastapi:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+      - mongo
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - MONGO_URI=mongodb://mongo:27017
+    volumes:
+      - .:/app
+
+  elasticsearch:
+    image: elasticsearch:7.17.22
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+  importer:
+    image: node:18
+    container_name: data_importer
+    depends_on:
+      - elasticsearch
+      - mongo
+    volumes:
+      - ./konsul_cases.json:/data/konsul_cases.json
+      - ./konsul_cases_mapping.json:/data/konsul_cases_mapping.json
+      - ./konsul.json:/data/konsul.json
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+    command: >
+      /bin/sh -c "apt-get update && apt-get install -y wget gnupg && \
+      wget -qO - https://pgp.mongodb.com/server-6.0.asc | gpg --batch --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg && \
+      echo 'deb [ signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main' | tee /etc/apt/sources.list.d/mongodb-org-6.0.list && \
+      apt-get update && apt-get install -y mongodb-database-tools && \
+      apt-get install -y npm && \
+      npm install -g elasticdump && \
+      sleep 10 && \
+      elasticdump --input=/data/konsul_cases.json --output=http://elasticsearch:9200/konsul_cases --type=data && \
+      elasticdump --input=/data/konsul_cases_mapping.json --output=http://elasticsearch:9200/konsul_cases --type=mapping && \
+      mongoimport --host mongo --port 27017 --db konsul_es --collection konsul --file /data/konsul.json --jsonArray"
+    restart: "no"
+
+
+volumes:
+  esdata:
+  mongodata:
