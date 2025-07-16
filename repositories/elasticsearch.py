@@ -1,3 +1,4 @@
+import re
 from typing import Optional, List, Dict
 
 
@@ -61,14 +62,48 @@ class ElasticsearchRepository:
             size: int = 15
     ) -> Dict:
         """
-        Специализированный поиск судебных дел
+        Специализированный поиск судебных дел с поддержкой точных фраз в кавычках
         """
-        return await self.search_with_highlight(
-            query={
+        # Находим точные фразы в кавычках (поддержка как одинарных, так и двойных)
+        exact_phrases = re.findall(r'"([^"]+)"|«([^»]+)»|“([^”]+)”', query_text)
+        # Выравниваем результат — оставляем только непустые группы
+        exact_phrases = [phrase for group in exact_phrases for phrase in group if phrase]
+
+        # Убираем точные фразы из основного текста (для "обычного" match)
+        text_without_phrases = query_text
+        for phrase in exact_phrases:
+            text_without_phrases = text_without_phrases.replace(f'"{phrase}"', '')
+            text_without_phrases = text_without_phrases.replace(f'«{phrase}»', '')
+            text_without_phrases = text_without_phrases.replace(f'“{phrase}”', '')
+
+        should_clauses = []
+
+        # Добавляем обычный match, если остался текст
+        if text_without_phrases.strip():
+            should_clauses.append({
                 "match": {
-                    "text_of_decision": query_text
+                    "text_of_decision": text_without_phrases.strip()
                 }
-            },
+            })
+
+        # Добавляем точные фразы как match_phrase
+        for phrase in exact_phrases:
+            should_clauses.append({
+                "match_phrase": {
+                    "text_of_decision": phrase
+                }
+            })
+
+        # Если нет ни обычного текста, ни точных фраз — fallback на пустой match_all
+        query = {
+            "bool": {
+                "should": should_clauses,
+                "minimum_should_match": 1 if should_clauses else 0
+            }
+        } if should_clauses else {"match_all": {}}
+
+        return await self.search_with_highlight(
+            query=query,
             source_fields=source_fields or ["case_number", "URL"],
             highlight_fields={"text_of_decision": {}},
             size=size
