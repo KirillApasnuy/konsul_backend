@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from api.controllers.search import router as search_router
-from core.dependencies import es_client, mongo_client
+from api.route.legal import router as search_router
+from core.dependencies import Elasticsearch
 
 app = FastAPI()
 
@@ -11,7 +11,7 @@ app.include_router(search_router, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешить все источники (для разработки). Лучше указать конкретные в проде.
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,8 +19,7 @@ app.add_middleware(
 
 @app.on_event("shutdown")
 async def shutdown():
-    await es_client.close()
-    mongo_client.close()
+    Elasticsearch.close()
 
 
 if __name__ == "__main__":
