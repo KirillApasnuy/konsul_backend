@@ -11,6 +11,10 @@ class CourtIndexingService:
     def __init__(self, repository: CourtDecisionRepository):
         self.repo = repository
 
+    async def create_es_index(self):
+        if self.repo.create_index():
+            return "Index created successful"
+
     def _extract_metadata(self, record: Dict[str, Any]) -> Dict[str, Any]:
         text = record.get("text_of_decision", "")
         date_str = record.get("date", "")
