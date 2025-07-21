@@ -2,3 +2,5 @@
 __pycache__/
 .idea/
 .git/
+court_decisions.json
+court_decisions_mapping.json

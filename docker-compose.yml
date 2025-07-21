@@ -30,10 +30,10 @@ services:
     container_name: data_importer
     depends_on:
       - elasticsearch
-      - mongo
     volumes:
       - ./court_decisions.json:/data/court_decisions.json
       - ./court_decisions_mapping.json:/data/court_decisions_mapping.json
+      - ./hunspell:/usr/share/elasticsearch/config/hunspell
     environment:
       - DEBIAN_FRONTEND=noninteractive
     command: >
@@ -48,4 +48,3 @@ services:
 
 volumes:
   esdata:
-  mongodata:
