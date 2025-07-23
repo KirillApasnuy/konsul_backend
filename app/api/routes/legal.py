@@ -4,9 +4,9 @@ from typing import Dict, Any
 from elastic_transport import ObjectApiResponse
 from fastapi import APIRouter, Depends
 
-from api.model.request.legal_analysis_request import LegalAnalysisRequest
-from api.model.request.legal_search_request import LegalSearchRequest
-from api.model.response.base_response import BaseResponse
+from api.models.request.legal_analysis_request import LegalAnalysisRequest
+from api.models.request.legal_search_request import LegalSearchRequest
+from api.models.response.base_response import BaseResponse
 from core.dependencies import get_analysis_service, get_search_service
 from services.court_search_service import CourtSearchService
 from services.legal_analysis_service import LegalAnalysisService

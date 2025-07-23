@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 
 from elastic_transport import ObjectApiResponse
 
-from api.model.request.legal_search_request import LegalSearchRequest
+from api.models.request.legal_search_request import LegalSearchRequest
 from repositories.court_decision_repository import CourtDecisionRepository
 from utils.nlp import extract_keywords_natasha
 

@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from api.route.legal import router as search_router
+from api.routes.legal import router as search_router
 from core.dependencies import Elasticsearch
 
 app = FastAPI()

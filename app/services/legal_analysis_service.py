@@ -1,5 +1,5 @@
-from api.model.request.legal_analysis_request import LegalAnalysisRequest
-from api.model.request.legal_search_request import LegalSearchRequest
+from api.models.request.legal_analysis_request import LegalAnalysisRequest
+from api.models.request.legal_search_request import LegalSearchRequest
 from clients.gemini_client import GeminiClient
 from services.court_search_service import CourtSearchService
 
