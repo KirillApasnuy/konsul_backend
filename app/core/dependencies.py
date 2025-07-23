@@ -1,4 +1,3 @@
-from services.court_indexing_service import CourtIndexingService
 from services.court_search_service import CourtSearchService
 from services.legal_analysis_service import LegalAnalysisService
 from clients.gemini_client import GeminiClient
@@ -13,9 +12,6 @@ def get_decision_repository():
 
 def get_search_service():
     return CourtSearchService(get_decision_repository())
-
-def get_indexing_service():
-    return CourtIndexingService(get_decision_repository())
 
 def get_analysis_service():
     return LegalAnalysisService(

@@ -4,12 +4,12 @@ from fastapi import APIRouter, Depends
 
 from api.model.request.legal_analysis_request import LegalAnalysisRequest
 from api.model.request.legal_search_request import LegalSearchRequest
-from services.court_indexing_service import CourtIndexingService
+from core.dependencies import get_analysis_service, get_search_service
 from services.court_search_service import CourtSearchService
 from services.legal_analysis_service import LegalAnalysisService
-from core.dependencies import get_analysis_service, get_search_service, get_indexing_service
 
-router = APIRouter()
+router = APIRouter(tags=["search/analys legal-cases"])
+
 
 @router.post("/search/legal-analysis")
 async def analyze_legal_practice(
@@ -25,22 +25,17 @@ async def analyze_legal_practice(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
 
+
 @router.post("/search/legal-cases")
-async def analyze_legal_practice(
+async def search_legal_cases(
         request: LegalSearchRequest,
         search_service: CourtSearchService = Depends(get_search_service)
 ):
+    """
+    Поиск релевантных дел
+    """
     try:
         result = await search_service.smart_search(request)
         return {"search": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
-
-@router.post("/es/create_index")
-async def analyze_legal_practice(indexing_service: CourtIndexingService = Depends(get_indexing_service)):
-    try:
-        result = await indexing_service.create_es_index()
-        return {"result": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
-

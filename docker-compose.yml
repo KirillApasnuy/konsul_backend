@@ -7,44 +7,54 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
     volumes:
-      - .:/app
+      - ./app:/app
+    restart: unless-stopped
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    image: elasticsearch:8.12.2
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - indices.analysis.hunspell.dictionary.ignore_case=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ports:
       - "127.0.0.1:9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
-
-  importer:
-    image: node:18
-    container_name: data_importer
-    depends_on:
-      - elasticsearch
-    volumes:
-      - ./court_decisions.json:/data/court_decisions.json
-      - ./court_decisions_mapping.json:/data/court_decisions_mapping.json
       - ./hunspell:/usr/share/elasticsearch/config/hunspell
-    environment:
-      - DEBIAN_FRONTEND=noninteractive
-    command: >
-      /bin/sh -c "apt-get update && apt-get install -y wget gnupg && \
-      apt-get install -y npm && \
-      npm install -g elasticdump && \
-      sleep 10 && \
-      elasticdump --input=/data/court_decisions.json --output=http://elasticsearch:9200/court_decisions --type=data && \
-      elasticdump --input=/data/court_decisions_mapping.json --output=http://elasticsearch:9200/court_decisions --type=mapping"
-    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
 
+  indexer:
+    build: .
+    container_name: indexer
+    depends_on:
+      fastapi:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    command: >
+      sh -c "pip install -r /indexing/requirements.txt &&
+             python /indexing/main.py"
+    volumes:
+      - ./indexing:/indexing
+      - ./indexing/data:/data
+    working_dir: /
+    restart: "no"
 
 volumes:
   esdata:
