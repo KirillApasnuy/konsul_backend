@@ -1,5 +1,7 @@
 from typing import Dict, Any, List
 
+from elastic_transport import ObjectApiResponse
+
 from api.model.request.legal_search_request import LegalSearchRequest
 from repositories.court_decision_repository import CourtDecisionRepository
 from utils.nlp import extract_keywords_natasha
@@ -9,7 +11,7 @@ class CourtSearchService:
     def __init__(self, repository: CourtDecisionRepository):
         self.repo = repository
 
-    async def smart_search(self, search_model: LegalSearchRequest) -> Dict[str, Any]:
+    async def smart_search(self, search_model: LegalSearchRequest) -> ObjectApiResponse:
         processed_query = extract_keywords_natasha(search_model.query)
         query_body = {
             "query": {

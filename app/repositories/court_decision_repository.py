@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 
+from elastic_transport import ObjectApiResponse
 from elasticsearch import Elasticsearch, helpers, RequestError
 
 
@@ -144,7 +145,7 @@ class CourtDecisionRepository:
         helpers.bulk(self.es, actions)
         return len(actions)
 
-    def search(self, body: Dict[str, Any]) -> Dict:
+    def search(self, body: Dict[str, Any]) -> ObjectApiResponse:
         return self.es.search(index=self.index_name, body=body)
 
     def get_by_id(self, doc_id: str) -> Dict[str, Any]:

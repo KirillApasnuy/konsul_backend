@@ -55,6 +55,7 @@ services:
       - ./indexing/data:/data
     working_dir: /
     restart: "no"
+    mem_limit: 3g
 
 volumes:
   esdata:

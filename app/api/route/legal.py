@@ -1,9 +1,12 @@
 from http.client import HTTPException
+from typing import Dict, Any
 
+from elastic_transport import ObjectApiResponse
 from fastapi import APIRouter, Depends
 
 from api.model.request.legal_analysis_request import LegalAnalysisRequest
 from api.model.request.legal_search_request import LegalSearchRequest
+from api.model.response.base_response import BaseResponse
 from core.dependencies import get_analysis_service, get_search_service
 from services.court_search_service import CourtSearchService
 from services.legal_analysis_service import LegalAnalysisService
@@ -11,7 +14,7 @@ from services.legal_analysis_service import LegalAnalysisService
 router = APIRouter(tags=["search/analys legal-cases"])
 
 
-@router.post("/search/legal-analysis")
+@router.post("/search/legal-analysis", response_model=BaseResponse)
 async def analyze_legal_practice(
         request: LegalAnalysisRequest,
         analysis_service: LegalAnalysisService = Depends(get_analysis_service)
@@ -21,12 +24,12 @@ async def analyze_legal_practice(
     """
     try:
         result = await analysis_service.analyze(request)
-        return {"analysis": result}
+        return BaseResponse(data=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
 
 
-@router.post("/search/legal-cases")
+@router.post("/search/legal-cases", response_model=BaseResponse)
 async def search_legal_cases(
         request: LegalSearchRequest,
         search_service: CourtSearchService = Depends(get_search_service)
@@ -35,7 +38,12 @@ async def search_legal_cases(
     Поиск релевантных дел
     """
     try:
-        result = await search_service.smart_search(request)
-        return {"search": result}
+        result: ObjectApiResponse = await search_service.smart_search(request)
+
+        body = result.body["hits"]
+
+        return BaseResponse(data=body)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка поиска: {str(e)}")
+
+
