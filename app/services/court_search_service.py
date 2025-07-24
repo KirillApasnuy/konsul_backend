@@ -11,7 +11,7 @@ class CourtSearchService:
     def __init__(self, repository: CourtDecisionRepository):
         self.repo = repository
 
-    async def smart_search(self, search_model: LegalSearchRequest) -> ObjectApiResponse:
+    async def smart_search(self, search_model: LegalSearchRequest) -> Dict[str, Any]:
         processed_query = extract_keywords_natasha(search_model.query)
         query_body = {
             "query": {
@@ -28,7 +28,7 @@ class CourtSearchService:
             },
             "highlight": {
                 "fields": {
-                    "text_of_decision": {"fragment_size": 150, "number_of_fragments": 3},
+                    "text_of_decision": {"fragment_size": 750, "number_of_fragments": 3},
                     "court": {}, "case_number": {}
                 }
             },
@@ -58,8 +58,10 @@ class CourtSearchService:
                 if search_model.filters.get("date_to"):
                     range_filter["lte"] = search_model.filters["date_to"]
                 query_body["query"]["bool"]["filter"].append({"range": {"date": range_filter}})
+        result = self.repo.search(query_body)
+        hits = result.body["hits"]
+        return hits
 
-        return self.repo.search(query_body)
 
 
     def get_similar_cases(self, case_id: str, size: int = 5) -> List[Dict]:

@@ -11,10 +11,12 @@ from core.dependencies import get_analysis_service, get_search_service
 from services.court_search_service import CourtSearchService
 from services.legal_analysis_service import LegalAnalysisService
 
-router = APIRouter(tags=["search/analys legal-cases"])
+router = APIRouter(
+    prefix="/search",
+    tags=["search/analys legal-cases"])
 
 
-@router.post("/search/legal-analysis", response_model=BaseResponse)
+@router.post("/legal-analysis", response_model=BaseResponse)
 async def analyze_legal_practice(
         request: LegalAnalysisRequest,
         analysis_service: LegalAnalysisService = Depends(get_analysis_service)
@@ -29,7 +31,7 @@ async def analyze_legal_practice(
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
 
 
-@router.post("/search/legal-cases", response_model=BaseResponse)
+@router.post("/legal-cases", response_model=BaseResponse)
 async def search_legal_cases(
         request: LegalSearchRequest,
         search_service: CourtSearchService = Depends(get_search_service)
@@ -38,11 +40,8 @@ async def search_legal_cases(
     Поиск релевантных дел
     """
     try:
-        result: ObjectApiResponse = await search_service.smart_search(request)
-
-        body = result.body["hits"]
-
-        return BaseResponse(data=body)
+        result = await search_service.smart_search(request)
+        return BaseResponse(data=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка поиска: {str(e)}")
 
