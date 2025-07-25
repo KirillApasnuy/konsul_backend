@@ -18,5 +18,5 @@ class LegalAnalysisService:
             return "No relevant court cases to analyze."
 
         texts = [hit["_source"]["text_of_decision"] + f"\nСсылка на дело: {hit['_source']['URL']}" for hit in
-                 search_result["hits"]["hits"]]
+                 search_result["hits"]]
         return self.llm_client.analyze(query=request.query, documents=texts)
