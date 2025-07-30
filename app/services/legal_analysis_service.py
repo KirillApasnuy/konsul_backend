@@ -1,3 +1,5 @@
+from fastapi import BackgroundTasks
+
 from api.models.request.legal_analysis_request import LegalAnalysisRequest
 from api.models.request.legal_search_request import LegalSearchRequest
 from clients.gemini_client import GeminiClient
@@ -9,10 +11,10 @@ class LegalAnalysisService:
         self.search_service = search_service
         self.llm_client = llm_client
 
-    async def analyze(self, request: LegalAnalysisRequest) -> str:
+    async def analyze(self, request: LegalAnalysisRequest, background_tasks: BackgroundTasks) -> str:
         search_model = LegalSearchRequest(query=request.query, limit=request.limit)
 
-        search_result = await self.search_service.smart_search(search_model)
+        search_result = await self.search_service.smart_search(search_model, background_tasks=background_tasks)
 
         if "text_of_decision" in search_result:
             return "No relevant court cases to analyze."

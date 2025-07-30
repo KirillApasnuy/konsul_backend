@@ -12,7 +12,6 @@ from elasticsearch.exceptions import RequestError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class CourtDecisionSearchEngine:
     def __init__(self, es_host: str = "http://elasticsearch:9200", index_name: str = "court_decisions"):
         self.es = Elasticsearch(es_host)
@@ -107,7 +106,7 @@ class CourtDecisionSearchEngine:
                         "type": "text",
                         "analyzer": "russian_analyzer",
                         "fields": {
-                            "raw": {"type": "keyword", "ignore_above": 256}
+                            "raw": {"type": "keyword", "ignore_above": 512}
                         }
                     },
                     "URL": {

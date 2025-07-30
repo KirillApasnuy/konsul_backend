@@ -1,18 +1,33 @@
+from time import perf_counter
 from typing import Dict, Any, List
 
-from elastic_transport import ObjectApiResponse
+from fastapi import BackgroundTasks
 
 from api.models.request.legal_search_request import LegalSearchRequest
+from clients.gemini_client import GeminiClient
 from repositories.court_decision_repository import CourtDecisionRepository
-from utils.nlp import extract_keywords_natasha
+from services.history_service import HistoryService
 
 
 class CourtSearchService:
-    def __init__(self, repository: CourtDecisionRepository):
-        self.repo = repository
+    def __init__(self,
+                 repository: CourtDecisionRepository,
+                 geminiClient: GeminiClient,
+                 history_service: HistoryService):
 
-    async def smart_search(self, search_model: LegalSearchRequest) -> Dict[str, Any]:
-        processed_query = extract_keywords_natasha(search_model.query)
+        self.background_tasks = None
+        self.repo = repository
+        self.client = geminiClient
+        self.history_service = history_service
+
+    def record_history(self, start_time, end_time, query, processed_query):
+        duration = end_time - start_time
+        self.history_service.record(query, processed_query, duration)
+
+    async def smart_search(self, search_model: LegalSearchRequest, background_tasks: None | BackgroundTasks) -> Dict[
+        str, Any]:
+        start_time = perf_counter()
+        processed_query = self.client.rewrite_to_legal_query(search_model.query)
         query_body = {
             "query": {
                 "bool": {
@@ -28,7 +43,7 @@ class CourtSearchService:
             },
             "highlight": {
                 "fields": {
-                    "text_of_decision": {"fragment_size": 750, "number_of_fragments": 3},
+                    "text_of_decision": {"fragment_size": 900, "number_of_fragments": 5},
                     "court": {}, "case_number": {}
                 }
             },
@@ -60,9 +75,18 @@ class CourtSearchService:
                 query_body["query"]["bool"]["filter"].append({"range": {"date": range_filter}})
         result = self.repo.search(query_body)
         hits = result.body["hits"]
+
+        end_time = perf_counter()
+
+        if background_tasks:
+            background_tasks.add_task(
+                self.record_history,
+                start_time,
+                end_time,
+                search_model.query,
+                processed_query)
+
         return hits
-
-
 
     def get_similar_cases(self, case_id: str, size: int = 5) -> List[Dict]:
         doc = self.repo.get_by_id(case_id)
