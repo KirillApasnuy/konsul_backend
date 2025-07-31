@@ -10,4 +10,4 @@ router = APIRouter(
 
 @router.get("/query-history")
 async def get_query_history():
-    return FileResponse(path="/app/logs/history.log", filename="query-history.log", media_type='multipart/form-data')
+    return FileResponse(path="logs/history.log", filename="query-history.log", media_type='multipart/form-data')

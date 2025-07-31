@@ -27,10 +27,10 @@ async def analyze_legal_practice(
     """
     try:
         result = await analysis_service.analyze(request, background_tasks=background_tasks)
-        if isinstance(request, str):
-            return BaseResponse(data=result)
-        else:
+        if request.is_stream:
             return StreamingResponse(content=result, media_type="text/plain")
+        else:
+            return BaseResponse(data=result)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")

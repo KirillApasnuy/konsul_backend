@@ -24,6 +24,7 @@ class LegalAnalysisService:
 
         texts = [hit["_source"]["text_of_decision"] + f"\nСсылка на дело: {hit['_source']['URL']}" for hit in
                  search_result["hits"]]
+
         if request.is_stream:
             return self.llm_client.analyze_stream(
                 query=request.query,
