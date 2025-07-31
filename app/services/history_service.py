@@ -13,6 +13,6 @@ class HistoryService:
             user_query=user_query,
             legal_query=legal_query,
             duration=duration,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now()
         )
         self.repo.save(entry)

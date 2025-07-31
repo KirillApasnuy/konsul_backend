@@ -7,6 +7,7 @@ from api.models.request.legal_search_request import LegalSearchRequest
 from clients.gemini_client import GeminiClient
 from repositories.court_decision_repository import CourtDecisionRepository
 from services.history_service import HistoryService
+from utils.nlp import extract_keywords_natasha
 
 
 class CourtSearchService:
@@ -27,7 +28,10 @@ class CourtSearchService:
     async def smart_search(self, search_model: LegalSearchRequest, background_tasks: None | BackgroundTasks) -> Dict[
         str, Any]:
         start_time = perf_counter()
-        processed_query = self.client.rewrite_to_legal_query(search_model.query)
+        try:
+            processed_query = self.client.rewrite_to_legal_query(search_model.query)
+        except:
+            processed_query = extract_keywords_natasha(search_model.query)
         query_body = {
             "query": {
                 "bool": {

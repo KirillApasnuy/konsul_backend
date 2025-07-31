@@ -1,8 +1,7 @@
 from http.client import HTTPException
-from typing import Dict, Any
 
-from elastic_transport import ObjectApiResponse
 from fastapi import APIRouter, Depends, BackgroundTasks
+from starlette.responses import StreamingResponse
 
 from api.models.request.legal_analysis_request import LegalAnalysisRequest
 from api.models.request.legal_search_request import LegalSearchRequest
@@ -28,7 +27,11 @@ async def analyze_legal_practice(
     """
     try:
         result = await analysis_service.analyze(request, background_tasks=background_tasks)
-        return BaseResponse(data=result)
+        if isinstance(request, str):
+            return BaseResponse(data=result)
+        else:
+            return StreamingResponse(content=result, media_type="text/plain")
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {str(e)}")
 
@@ -47,5 +50,3 @@ async def search_legal_cases(
         return BaseResponse(data=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка поиска: {str(e)}")
-
-

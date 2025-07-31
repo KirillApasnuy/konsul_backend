@@ -2,9 +2,9 @@ from typing import Optional, Dict
 
 from pydantic import BaseModel
 
+from api.models.request.base_request import BaseRequest
 
-class LegalSearchRequest(BaseModel):
-    query: str
+
+class LegalSearchRequest(BaseRequest):
     filters: Optional[Dict] = None
-    limit: Optional[int] = 15
     from_: Optional[int] = 0

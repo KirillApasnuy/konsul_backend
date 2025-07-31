@@ -7,3 +7,5 @@ indexing/data/baza350kcases.jsonl
 
 court_decisions.json
 court_decisions_mapping.json
+
+*.log

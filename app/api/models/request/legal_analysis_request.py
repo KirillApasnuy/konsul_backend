@@ -2,7 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from api.models.request.base_request import BaseRequest
 
-class LegalAnalysisRequest(BaseModel):
-    query: str
-    limit: Optional[int] = 15
+
+class LegalAnalysisRequest(BaseRequest):
+    is_stream: bool = False
