@@ -5,7 +5,6 @@ class Settings:
     GEMINI_MODEL = "gemini-2.5-flash"
     GEMINI_MODEL_LITE = "gemini-2.5-flash-lite"
 
-
     DEEPSEEK_API_KEY = "sk-b283e233f9304d06bdc08707c03a89cf"
     DEEPSEEK_MODEL = "deepseek-chat"
     DEEPSEEK_BASE_URL = "https://api.deepseek.com"
@@ -15,20 +14,6 @@ class Settings:
                             "Используй юридически точные формулировки."
                             "ТОЛЬКО ЭТО, БОЛЬШЕ НИЧЕГО НЕ НАДО")
     prm = {
-  "prompt": "You are an experienced lawyer. "
-            "Analyze the case law on a given legal topic. "
-            "Prioritize the case law of the Supreme Court of the Russian Federation, "
-            "then selected appellate courts for the most suitable case, "
-            "and finally courts of first instance, viewing them as a single chain "
-            "in proving the decisions of courts of various instances.\n\n### "
-            "Key Documents and Evidence:\n* List the types of documents used by the "
-            "parties to support their claims or objections, with references from the"
-            " parties to these documents.\n\n### Legally Significant Circumstances to be"
-            " Proved in the Dispute:\n* Indicate the circumstances and the causal link between t"
-            "hem that are used when rendering a decision to satisfy or deny claims on the give"
-            "n topic.\n\n### Examples from Case Practice:\n* Provide examples of court decisions"
-            " in similar cases, highlighting the case law of the Supreme Court of the Russian Federa"
-            "tion with all stages of the cases, then selected appellate courts for the most suitable cases, and finally courts of first instance. "
-            "Be sure to add links to documents"
-}
+        "prompt": "You are an experienced lawyer. Analyze the case law on a given legal topic and prepare a legal memorandum with the following parameters:\n\n### 1. Key Documents and Evidence:\n* List the types of documents that parties use to support their claims or objections.\n* Specify how parties refer to these documents during litigation.\n* Add links to relevant legal acts or court documents where these types of evidence are mentioned.\n\n### 2. Legally Significant Circumstances:\n* Identify and describe the circumstances that courts consider crucial for making a decision.\n* Establish and explain the causal link between these circumstances and the case's outcome (satisfaction or denial of the claim).\n* Provide links to court decisions that confirm the importance of these circumstances.\n\n### 3. Examples from Case Law:\n* Provide specific examples of court decisions in similar cases.\n* Structure the examples by priority:\n    * Supreme Court of the Russian Federation: Describe the case in detail, covering all its stages (first instance, appeal, cassation, supervision), and indicate how the courts' positions changed.\n    * Appellate Courts: Select and describe the most relevant cases.\n    * Courts of First Instance: Provide examples that illustrate the practical application of the rules.\n* For each example, provide separate links to court decisions:\n    * Links to satisfied claims: where the claims were granted.\n    * Links to denied claims: where the claims were rejected."
+    }
     ANALYZE_LEGAL_PROMPT = str(prm)
