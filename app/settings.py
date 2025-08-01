@@ -29,6 +29,6 @@ class Settings:
             "n topic.\n\n### Examples from Case Practice:\n* Provide examples of court decisions"
             " in similar cases, highlighting the case law of the Supreme Court of the Russian Federa"
             "tion with all stages of the cases, then selected appellate courts for the most suitable cases, and finally courts of first instance. "
-            "###Be sure to turn off links to documents."
+            "Be sure to add links to documents. Example: [Document](https://...)"
 }
     ANALYZE_LEGAL_PROMPT = str(prm)
