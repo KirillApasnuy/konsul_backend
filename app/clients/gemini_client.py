@@ -51,5 +51,5 @@ class GeminiClient:
 
         """
 
-        response = self.client.models.generate_content(model=self.model, contents=prompt)
+        response = self.client.models.generate_content(model=Settings.GEMINI_MODEL_LITE, contents=prompt)
         return response.text

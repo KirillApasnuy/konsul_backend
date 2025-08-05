@@ -19,7 +19,7 @@ def get_history_repository():
 
 def get_gemini_client():
     return GeminiClient(Settings.GEMINI_API_KEY,
-                        Settings.GEMINI_MODEL_LITE)
+                        Settings.GEMINI_MODEL)
 
 
 def get_search_service():

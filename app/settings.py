@@ -2,7 +2,7 @@ class Settings:
     ES_HOST = "http://elasticsearch:9200"
     ES_INDEX = "court_decisions"
     GEMINI_API_KEY = "AIzaSyC-rOs5RxAWrmZFYpkBjbon5qYdCqto-cc"
-    GEMINI_MODEL = "gemini-2.5-flash"
+    GEMINI_MODEL = "gemini-2.5-pro"
     GEMINI_MODEL_LITE = "gemini-2.5-flash-lite"
 
     DEEPSEEK_API_KEY = "sk-b283e233f9304d06bdc08707c03a89cf"
